@@ -1,5 +1,6 @@
 import com.google.inject.internal.cglib.proxy.$FixedValue;
 import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import scala.Tuple2;
@@ -16,7 +17,8 @@ public class Main {
         // mapExample();
         // printEachItemInRDDExample();
         // countHowManyItemsInRDDExample();
-        tuplesExample();
+        // tuplesExample();
+        pairRDDExample();
     }
 
 
@@ -162,7 +164,7 @@ public class Main {
     }
 
     /*
-        Tuples的话，就可以自己建一个colleciton来hold很多objects的mapping
+        Tuples的话，存多达22个fields的collection
      */
     public static void tuplesExample(){
         List<Integer> inputData = new ArrayList<>();
@@ -215,5 +217,84 @@ public class Main {
                 , value + 9, value + 10, value + 11, value + 12, value + 13, value + 14, value + 15, value + 16, value + 17
                 , value + 18, value + 19, value + 20));
         twentyTwoElementTuples.collect().forEach(System.out::println);
+    }
+
+    /*
+         PairRDD的话，存2个fields的collection
+     */
+    public static void pairRDDExample(){
+        List<String> inputData = new ArrayList<>();
+        inputData.add("WARN: Tuesday 4 September 0405");
+        inputData.add("ERROR: Tuesday 4 September 0408");
+        inputData.add("FATAL: Wednesday 5 September 1632");
+        inputData.add("ERROR: Friday 7 September 1854");
+        inputData.add("WARN: Saturday 8 September 1942");
+
+
+
+        /*
+            local uses 1 thread only.
+            local[n] uses n threads.
+            local[*] uses as many threads as your spark local machine have, where you are running your application.
+         */
+        SparkConf conf = new SparkConf().setAppName("startingSpark").setMaster("local[*]");
+        JavaSparkContext sc = new JavaSparkContext(conf);
+
+        JavaRDD<String> myRdd = sc.parallelize(inputData);
+
+        JavaPairRDD<String, String> pairRdd = myRdd.mapToPair(value -> {
+            String[] columns = value.split("\\:");
+            String level = columns[0];
+            String date = columns[1];
+            return new Tuple2<>(level, date);
+        });
+
+        /*
+            (WARN, Tuesday 4 September 0405)
+            (ERROR, Tuesday 4 September 0408)
+            (FATAL, Wednesday 5 September 1632)
+            (ERROR, Friday 7 September 1854)
+            (WARN, Saturday 8 September 1942)
+         */
+        pairRdd.collect().forEach(System.out::println);
+        sc.close();
+    }
+
+    public static void groupingByKeyExample(){
+        List<String> inputData = new ArrayList<>();
+        inputData.add("WARN: Tuesday 4 September 0405");
+        inputData.add("ERROR: Tuesday 4 September 0408");
+        inputData.add("FATAL: Wednesday 5 September 1632");
+        inputData.add("ERROR: Friday 7 September 1854");
+        inputData.add("WARN: Saturday 8 September 1942");
+
+
+
+        /*
+            local uses 1 thread only.
+            local[n] uses n threads.
+            local[*] uses as many threads as your spark local machine have, where you are running your application.
+         */
+        SparkConf conf = new SparkConf().setAppName("startingSpark").setMaster("local[*]");
+        JavaSparkContext sc = new JavaSparkContext(conf);
+
+        JavaRDD<String> myRdd = sc.parallelize(inputData);
+
+        JavaPairRDD<String, String> pairRdd = myRdd.mapToPair(value -> {
+            String[] columns = value.split("\\:");
+            String level = columns[0];
+            String date = columns[1];
+            return new Tuple2<>(level, date);
+        });
+
+        /*
+            (WARN, Tuesday 4 September 0405)
+            (ERROR, Tuesday 4 September 0408)
+            (FATAL, Wednesday 5 September 1632)
+            (ERROR, Friday 7 September 1854)
+            (WARN, Saturday 8 September 1942)
+         */
+        pairRdd.collect().forEach(System.out::println);
+        sc.close();
     }
 }
