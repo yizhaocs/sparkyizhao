@@ -14,9 +14,9 @@ public class Main {
     public static void main(String[] args){
         // loadCollectionIntoRDDExample();
         // reduceExample();
-        // mapExample();
+        mapExample();
         // printEachItemInRDDExample();
-        countInRDDExample();
+        // countInRDDExample();
         // tuplesExample();
         // pairRDDExample();
         // countInPairRDD();
@@ -63,12 +63,19 @@ public class Main {
          */
         SparkConf conf = new SparkConf().setAppName("startingSpark").setMaster("local[*]");
         JavaSparkContext sc = new JavaSparkContext(conf);
+        {
+            /////////////////////////////////////////以下是Production Code/////////////////////////////////////////////////////////////////
+            Double result = sc.parallelize(inputData).reduce((value1, value2) -> value1 + value2);
+            System.out.println("result:" + result); // result:158.63943
+        }
 
-        JavaRDD<Double> myRdd = sc.parallelize(inputData);
+        {
+            /////////////////////////////////////////以下是Easy Debug Code/////////////////////////////////////////////////////////////////
+            JavaRDD<Double> myRdd = sc.parallelize(inputData);
 
-        Double result = myRdd.reduce((value1, value2) -> value1 + value2);
-        System.out.println("result:" + result); // result:158.63943
-
+            Double result = myRdd.reduce((value1, value2) -> value1 + value2);
+            System.out.println("result:" + result); // result:158.63943
+        }
         sc.close();
     }
 
@@ -82,6 +89,8 @@ public class Main {
         inputData.add(90);
         inputData.add(20);
 
+
+
         /*
             local uses 1 thread only.
             local[n] uses n threads.
@@ -90,15 +99,32 @@ public class Main {
         SparkConf conf = new SparkConf().setAppName("startingSpark").setMaster("local[*]");
         JavaSparkContext sc = new JavaSparkContext(conf);
 
-        JavaRDD<Integer> myRdd = sc.parallelize(inputData);
+        {
+            /////////////////////////////////////////以下是Production Code/////////////////////////////////////////////////////////////////
+            /*
+                5.916079783099616
+                3.4641016151377544
+                9.486832980505138
+                4.47213595499958
+             */
+            sc.parallelize(inputData).map(value -> Math.sqrt(value)).collect().forEach(System.out::println);
+        }
+        {
+            /////////////////////////////////////////以下是Easy Debug Code/////////////////////////////////////////////////////////////////
+            JavaRDD<Integer> myRdd = sc.parallelize(inputData);
 
-        Integer result = myRdd.reduce((value1, value2) -> value1 + value2);
+            Integer result = myRdd.reduce((value1, value2) -> value1 + value2);
 
-        JavaRDD<Double> sqrtRdd = myRdd.map(value -> Math.sqrt(value));
-
-        sqrtRdd.collect().forEach(System.out::println);
-        System.out.println("result:" + result); // result:157
-
+            JavaRDD<Double> sqrtRdd = myRdd.map(value -> Math.sqrt(value));
+            /*
+                5.916079783099616
+                3.4641016151377544
+                9.486832980505138
+                4.47213595499958
+             */
+            sqrtRdd.collect().forEach(System.out::println);
+            System.out.println("result:" + result); // result:157
+        }
         sc.close();
     }
 
