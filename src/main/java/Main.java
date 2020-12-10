@@ -16,9 +16,11 @@ public class Main {
         // reduceExample();
         // mapExample();
         // printEachItemInRDDExample();
-        // countHowManyItemsInRDDExample();
+        // countInRDDExample();
         // tuplesExample();
-        pairRDDExample();
+        // pairRDDExample();
+        countInPairRDD();
+        // countInPairRDDProductionWay();
     }
 
 
@@ -135,7 +137,7 @@ public class Main {
     /*
         count How Many Items In RDD
      */
-    public static void countHowManyItemsInRDDExample(){
+    public static void countInRDDExample(){
         List<Integer> inputData = new ArrayList<>();
         inputData.add(35);
         inputData.add(12);
@@ -260,7 +262,10 @@ public class Main {
         sc.close();
     }
 
-    public static void groupingByKeyExample(){
+    /*
+        count Values With Same Key In PairRDD
+     */
+    public static void countInPairRDD(){
         List<String> inputData = new ArrayList<>();
         inputData.add("WARN: Tuesday 4 September 0405");
         inputData.add("ERROR: Tuesday 4 September 0408");
@@ -278,23 +283,35 @@ public class Main {
         SparkConf conf = new SparkConf().setAppName("startingSpark").setMaster("local[*]");
         JavaSparkContext sc = new JavaSparkContext(conf);
 
+
+         /*
+            FATAL has 1 instances
+            WARN has 2 instances
+            ERROR has 2 instances
+         */
+        sc.parallelize(inputData)
+                .mapToPair(value -> new Tuple2<>(value.split(":")[0], 1L))
+                .reduceByKey((value1, value2) -> value1 + value2)
+                .collect().forEach(tuple -> System.out.println(tuple._1 + " has " + tuple._2 + " instances"));
+        /////////////////////////////////////////以上是Production Code/////////////////////////////////////////////////////////////////
+        /////////////////////////////////////////以下是Easy Debug Code/////////////////////////////////////////////////////////////////
+
         JavaRDD<String> myRdd = sc.parallelize(inputData);
 
-        JavaPairRDD<String, String> pairRdd = myRdd.mapToPair(value -> {
+        JavaPairRDD<String, Long> pairRdd = myRdd.mapToPair(value -> {
             String[] columns = value.split("\\:");
             String level = columns[0];
             String date = columns[1];
-            return new Tuple2<>(level, date);
+            return new Tuple2<>(level, 1L);
         });
 
+        JavaPairRDD<String, Long> sumsRdd = pairRdd.reduceByKey((value1, value2) -> value1 + value2 );
         /*
-            (WARN, Tuesday 4 September 0405)
-            (ERROR, Tuesday 4 September 0408)
-            (FATAL, Wednesday 5 September 1632)
-            (ERROR, Friday 7 September 1854)
-            (WARN, Saturday 8 September 1942)
+            FATAL has 1 instances
+            WARN has 2 instances
+            ERROR has 2 instances
          */
-        pairRdd.collect().forEach(System.out::println);
+        sumsRdd.collect().forEach(tuple -> System.out.println(tuple._1 + " has " + tuple._2 + " instances"));
         sc.close();
     }
 }
