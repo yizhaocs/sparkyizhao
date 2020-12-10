@@ -55,8 +55,8 @@ public class Main {
 
         JavaRDD<Double> sqrtRdd = myRdd.map(value -> Math.sqrt(value));
 
-        sqrtRdd.foreach(System.out::println);
-        System.out.println("result:" + result); // result:158.63943
+        sqrtRdd.collect().forEach(System.out::println);
+        System.out.println("result:" + result); // result:157
 
         sc.close();
     }
