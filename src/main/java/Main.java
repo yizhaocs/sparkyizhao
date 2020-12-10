@@ -2,6 +2,8 @@ import com.google.inject.internal.cglib.proxy.$FixedValue;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import scala.Tuple2;
+import scala.Tuple4;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,8 +13,9 @@ public class Main {
         // loadCollectionIntoRDDExample();
         // reduceExample();
         // mapExample();
-        printEachItemInRDDExample();
+        // printEachItemInRDDExample();
         // countHowManyItemsInRDDExample();
+        tuplesExample();
     }
 
 
@@ -155,5 +158,41 @@ public class Main {
         System.out.println("count:" + count); // 4
 
         sc.close();
+    }
+
+    public static void tuplesExample(){
+        List<Integer> inputData = new ArrayList<>();
+        inputData.add(35);
+        inputData.add(12);
+        inputData.add(90);
+        inputData.add(20);
+
+        /*
+            local uses 1 thread only.
+            local[n] uses n threads.
+            local[*] uses as many threads as your spark local machine have, where you are running your application.
+         */
+        SparkConf conf = new SparkConf().setAppName("startingSpark").setMaster("local[*]");
+        JavaSparkContext sc = new JavaSparkContext(conf);
+
+        JavaRDD<Integer> myRdd = sc.parallelize(inputData);
+
+        JavaRDD<Tuple2<Integer, Double>> twoElementTuples = myRdd.map(value -> new Tuple2<>(value, Math.sqrt(value)));
+        /*
+            (35,5.916079783099616)
+            (12,3.4641016151377544)
+            (90,9.486832980505138)
+            (20,4.47213595499958)
+         */
+        twoElementTuples.collect().forEach(System.out::println);
+
+        JavaRDD<Tuple4<Integer, Double,Integer,Integer>> fourElementTuples = myRdd.map(value -> new Tuple4<>(value, Math.sqrt(value), value + 1, value + 10));
+        /*
+            (35,5.916079783099616,36,45)
+            (12,3.4641016151377544,13,22)
+            (90,9.486832980505138,91,100)
+            (20,4.47213595499958,21,30)
+         */
+        fourElementTuples.collect().forEach(System.out::println);
     }
 }
