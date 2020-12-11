@@ -53,6 +53,11 @@ public class Main {
         sc.close();
     }
 
+    /*
+        load file 从local -> sc.textFile("src/main/resources/biglog.txt")
+        load file 从AWS s3 -> sc.textFile("s3n://bucketname/Filename")
+        load file 从HDFS -> sc.textFile("hdfs://nn1home:8020/text01.txt")
+     */
     public static void loadTextFileIntoRDDExample(){
         Logger.getLogger("org.apache").setLevel(Level.WARN);
         /*
