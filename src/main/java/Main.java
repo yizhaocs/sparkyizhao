@@ -22,7 +22,8 @@ public class Main {
         // tuplesExample();
         // pairRDDExample();
         // countInPairRDD();
-        flatmapExample();
+        // flatmapExample();
+        filterExample();
     }
 
 
@@ -460,6 +461,45 @@ public class Main {
                 0408
              */
             words.collect().forEach(System.out::println);
+        }
+        sc.close();
+    }
+
+
+    /*
+        filter 的作用相当于Pixel Data Engine里的condition rule,如果condition是false则不输出
+     */
+    public static void filterExample(){
+        Logger.getLogger("org.apache").setLevel(Level.WARN);
+        List<String> inputData = new ArrayList<>();
+        inputData.add("WARN: Tuesday 4 September 0405");
+        inputData.add("ERROR: Tuesday 4 September 0408");
+
+        /*
+            local uses 1 thread only.
+            local[n] uses n threads.
+            local[*] uses as many threads as your spark local machine have, where you are running your application.
+         */
+        SparkConf conf = new SparkConf().setAppName("startingSpark").setMaster("local[*]");
+        JavaSparkContext sc = new JavaSparkContext(conf);
+
+        {
+            /////////////////////////////////////////以下是Production Code//////////////////////////////////////////////////////////////////
+            /*
+               ERROR: Tuesday 4 September 0408
+             */
+            sc.parallelize(inputData).filter(value -> value.contains("ERROR")).collect().forEach(System.out::println);
+
+        }
+        System.out.println();
+        {
+            /////////////////////////////////////////以下是Easy Debug Code/////////////////////////////////////////////////////////////////
+            JavaRDD<String> myRdd = sc.parallelize(inputData);
+            JavaRDD<String> filterResult = myRdd.filter(value -> value.contains("ERROR"));
+            /*
+               ERROR: Tuesday 4 September 0408
+             */
+            filterResult.collect().forEach(System.out::println);
         }
         sc.close();
     }
