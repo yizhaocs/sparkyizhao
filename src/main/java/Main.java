@@ -15,6 +15,7 @@ import java.util.List;
 public class Main {
     public static void main(String[] args){
         // loadCollectionIntoRDDExample();
+        loadTextFileIntoRDDExample();
         // reduceExample();
         // mapExample();
         // printEachItemInRDDExample();
@@ -23,7 +24,7 @@ public class Main {
         // pairRDDExample();
         // countInPairRDD();
         // flatmapExample();
-        filterExample();
+        // filterExample();
     }
 
 
@@ -51,6 +52,42 @@ public class Main {
 
         sc.close();
     }
+
+    public static void loadTextFileIntoRDDExample(){
+        Logger.getLogger("org.apache").setLevel(Level.WARN);
+        /*
+            local uses 1 thread only.
+            local[n] uses n threads.
+            local[*] uses as many threads as your spark local machine have, where you are running your application.
+         */
+        SparkConf conf = new SparkConf().setAppName("startingSpark").setMaster("local[*]");
+        JavaSparkContext sc = new JavaSparkContext(conf);
+
+
+        {
+            /////////////////////////////////////////以下是Production Code//////////////////////////////////////////////////////////////////
+            Integer infoCount = sc.textFile("src/main/resources/biglog.txt").filter(value -> value.contains("INFO")).map(value -> 1).reduce((value1, value2) -> value1 + value2);
+            // infoCount:343066
+            System.out.println("infoCount:" + infoCount);
+
+            Integer errorCount = sc.textFile("src/main/resources/biglog.txt").filter(value -> value.contains("ERROR")).map(value -> 1).reduce((value1, value2) -> value1 + value2);
+            // errorCount:48100
+            System.out.println("errorCount:" + errorCount);
+        }
+        System.out.println();
+        {
+            /////////////////////////////////////////以下是Easy Debug Code/////////////////////////////////////////////////////////////////
+            JavaRDD<String> myRdd = sc.textFile("src/main/resources/biglog.txt");
+            JavaRDD<String> errorData = myRdd.filter(value -> value.contains("ERROR"));
+            JavaRDD<Integer> singleIntegerRdd = errorData.map(value -> 1);
+            Integer errorCount = singleIntegerRdd.reduce((value1, value2) -> value1 + value2);
+            // errorCount:48100
+            System.out.println("errorCount:" + errorCount);
+        }
+
+        sc.close();
+    }
+
 
     /*
         reduce means reduce the collection into the single answer
