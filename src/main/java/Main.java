@@ -89,6 +89,7 @@ public class Main {
 
     /*
         The map method on an RDD allows us to transform the structure of RRD from one to another.
+        用来把input转换为其它structure的data
      */
     public static void mapExample(){
         Logger.getLogger("org.apache").setLevel(Level.WARN);
@@ -467,7 +468,8 @@ public class Main {
 
 
     /*
-        filter 的作用相当于Pixel Data Engine里的condition rule,如果condition是false则不输出
+        filter 的作用相当于Pixel Data Engine里的condition rule,如果condition是false则不输出。
+        Filter: 用来filter删除不要的数据从RDD中
      */
     public static void filterExample(){
         Logger.getLogger("org.apache").setLevel(Level.WARN);
