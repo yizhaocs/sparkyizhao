@@ -1,4 +1,3 @@
-import com.google.inject.internal.cglib.proxy.$FixedValue;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
@@ -10,18 +9,20 @@ import scala.Tuple22;
 import scala.Tuple4;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Main {
     public static void main(String[] args){
         // loadCollectionIntoRDDExample();
         // reduceExample();
-        mapExample();
+        // mapExample();
         // printEachItemInRDDExample();
         // countInRDDExample();
         // tuplesExample();
         // pairRDDExample();
         // countInPairRDD();
+        flatmapExample();
     }
 
 
@@ -396,6 +397,69 @@ public class Main {
             ERROR has 2 instances
          */
             sumsRdd.collect().forEach(tuple -> System.out.println(tuple._1 + " has " + tuple._2 + " instances"));
+        }
+        sc.close();
+    }
+
+
+    /*
+        map vs flatmap:
+            Map and FlatMap are the transformation operations in Spark.
+            transformation means transform data from one structure into another.
+            map transforms an RDD of length N into another RDD of length N.
+            map()是将函数用于RDD中的每个元素，将返回值构成新的RDD。
+            flatMap transforms an RDD of length N into a collection of N collections, then flattens these into a single RDD of results.
+            flatmap()是将函数应用于RDD中的每个元素，将返回的迭代器的所有内容构成新的RDD,这样就得到了一个由各列表中的元素组成的RDD,而不是一个列表组成的RDD。
+     */
+    public static void flatmapExample(){
+        Logger.getLogger("org.apache").setLevel(Level.WARN);
+        List<String> inputData = new ArrayList<>();
+        inputData.add("WARN: Tuesday 4 September 0405");
+        inputData.add("ERROR: Tuesday 4 September 0408");
+
+        /*
+            local uses 1 thread only.
+            local[n] uses n threads.
+            local[*] uses as many threads as your spark local machine have, where you are running your application.
+         */
+        SparkConf conf = new SparkConf().setAppName("startingSpark").setMaster("local[*]");
+        JavaSparkContext sc = new JavaSparkContext(conf);
+
+        {
+            /////////////////////////////////////////以下是Production Code//////////////////////////////////////////////////////////////////
+            /*
+                WARN:
+                Tuesday
+                4
+                September
+                0405
+                ERROR:
+                Tuesday
+                4
+                September
+                0408
+             */
+            sc.parallelize(inputData).flatMap(value -> Arrays.asList(value.split("\\s+")).iterator()).collect().forEach(System.out::println);
+
+        }
+        System.out.println();
+        {
+            /////////////////////////////////////////以下是Easy Debug Code/////////////////////////////////////////////////////////////////
+            JavaRDD<String> myRdd = sc.parallelize(inputData);
+            JavaRDD<String>  words = myRdd.flatMap(value -> Arrays.asList(value.split("\\s+")).iterator());
+            /*
+                WARN:
+                Tuesday
+                4
+                September
+                0405
+                ERROR:
+                Tuesday
+                4
+                September
+                0408
+             */
+            words.collect().forEach(System.out::println);
         }
         sc.close();
     }
