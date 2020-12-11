@@ -107,6 +107,9 @@ public class Main {
         SparkConf conf = new SparkConf().setAppName("startingSpark").setMaster("local[*]");
         JavaSparkContext sc = new JavaSparkContext(conf);
 
+        /*
+            以下例子是用map function来transform data从integer到其开根号，结果是double data type
+         */
         {
             /////////////////////////////////////////以下是Production Code/////////////////////////////////////////////////////////////////
             /*
@@ -312,7 +315,7 @@ public class Main {
                 (WARN, Saturday 8 September 1942)
              */
             sc.parallelize(inputData)
-                    .mapToPair(value -> new Tuple2<>(value.split(":")[0], value.split(":")[1]))
+                    .mapToPair(value -> new Tuple2<>(value.split("\\:")[0], value.split("\\:")[1]))
                     .collect().forEach(System.out::println);
         }
         System.out.println();
