@@ -1,4 +1,6 @@
 import com.google.inject.internal.cglib.proxy.$FixedValue;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
@@ -27,6 +29,8 @@ public class Main {
         using JavaSparkContext's parallelize method to load collection into RDD
      */
     public static void loadCollectionIntoRDDExample(){
+        Logger.getLogger("org.apache").setLevel(Level.WARN);
+
         List<Double> inputData = new ArrayList<>();
         inputData.add(35.5);
         inputData.add(12.49943);
@@ -50,6 +54,8 @@ public class Main {
         reduce means reduce the collection into the single answer
      */
     public static void reduceExample(){
+        Logger.getLogger("org.apache").setLevel(Level.WARN);
+
         List<Double> inputData = new ArrayList<>();
         inputData.add(35.5);
         inputData.add(12.49943);
@@ -68,7 +74,7 @@ public class Main {
             Double result = sc.parallelize(inputData).reduce((value1, value2) -> value1 + value2);
             System.out.println("result:" + result); // result:158.63943
         }
-
+        System.out.println();
         {
             /////////////////////////////////////////以下是Easy Debug Code/////////////////////////////////////////////////////////////////
             JavaRDD<Double> myRdd = sc.parallelize(inputData);
@@ -83,6 +89,8 @@ public class Main {
         The map method on an RDD allows us to transform the structure of RRD from one to another.
      */
     public static void mapExample(){
+        Logger.getLogger("org.apache").setLevel(Level.WARN);
+
         List<Integer> inputData = new ArrayList<>();
         inputData.add(35);
         inputData.add(12);
@@ -109,6 +117,7 @@ public class Main {
              */
             sc.parallelize(inputData).map(value -> Math.sqrt(value)).collect().forEach(System.out::println);
         }
+        System.out.println();
         {
             /////////////////////////////////////////以下是Easy Debug Code/////////////////////////////////////////////////////////////////
             JavaRDD<Integer> myRdd = sc.parallelize(inputData);
@@ -132,6 +141,7 @@ public class Main {
         print Each Item In RDD
     */
     public static void printEachItemInRDDExample(){
+        Logger.getLogger("org.apache").setLevel(Level.WARN);
         List<Integer> inputData = new ArrayList<>();
         inputData.add(35);
         inputData.add(12);
@@ -156,6 +166,7 @@ public class Main {
              */
             sc.parallelize(inputData).collect().forEach(System.out::println);
         }
+        System.out.println();
         {
             /////////////////////////////////////////以下是Easy Debug Code/////////////////////////////////////////////////////////////////
             JavaRDD<Integer> myRdd = sc.parallelize(inputData);
@@ -175,6 +186,7 @@ public class Main {
         count How Many Items In RDD
      */
     public static void countInRDDExample(){
+        Logger.getLogger("org.apache").setLevel(Level.WARN);
         List<Integer> inputData = new ArrayList<>();
         inputData.add(35);
         inputData.add(12);
@@ -194,6 +206,7 @@ public class Main {
             Integer count = sc.parallelize(inputData).map(value -> 1).reduce((value1, value2) -> value1 + value2);
             System.out.println("count:" + count); // 4
         }
+        System.out.println();
         {
             /////////////////////////////////////////以下是Easy Debug Code/////////////////////////////////////////////////////////////////
             JavaRDD<Integer> myRdd = sc.parallelize(inputData);
@@ -213,6 +226,7 @@ public class Main {
         Tuples的话，存多达22个fields的collection
      */
     public static void tuplesExample(){
+        Logger.getLogger("org.apache").setLevel(Level.WARN);
         List<Integer> inputData = new ArrayList<>();
         inputData.add(35);
         inputData.add(12);
@@ -269,6 +283,7 @@ public class Main {
          PairRDD的话，存2个fields的collection
      */
     public static void pairRDDExample(){
+        Logger.getLogger("org.apache").setLevel(Level.WARN);
         List<String> inputData = new ArrayList<>();
         inputData.add("WARN: Tuesday 4 September 0405");
         inputData.add("ERROR: Tuesday 4 September 0408");
@@ -300,6 +315,7 @@ public class Main {
                     .mapToPair(value -> new Tuple2<>(value.split(":")[0], value.split(":")[1]))
                     .collect().forEach(System.out::println);
         }
+        System.out.println();
         {
             /////////////////////////////////////////以下是Easy Debug Code/////////////////////////////////////////////////////////////////
             JavaRDD<String> myRdd = sc.parallelize(inputData);
@@ -327,6 +343,7 @@ public class Main {
         count Values With Same Key In PairRDD
      */
     public static void countInPairRDD(){
+        Logger.getLogger("org.apache").setLevel(Level.WARN);
         List<String> inputData = new ArrayList<>();
         inputData.add("WARN: Tuesday 4 September 0405");
         inputData.add("ERROR: Tuesday 4 September 0408");
@@ -357,6 +374,7 @@ public class Main {
                     .reduceByKey((value1, value2) -> value1 + value2)
                     .collect().forEach(tuple -> System.out.println(tuple._1 + " has " + tuple._2 + " instances"));
         }
+        System.out.println();
         {
             /////////////////////////////////////////以下是Easy Debug Code/////////////////////////////////////////////////////////////////
             JavaRDD<String> myRdd = sc.parallelize(inputData);
