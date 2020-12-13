@@ -567,18 +567,19 @@ public class Main {
                 过滤掉数字和非字母字符
                 sentence.replace("^a-zA-Z\\s", "")的意思是replace非a-z和A-Z和space空格的字符到""
              */
-            JavaRDD<String> lettersOnlyOdd = myRdd.map(sentence -> sentence.replace("^a-zA-Z\\s", "").toLowerCase());
-            JavaRDD<String> removeBlankLines = lettersOnlyOdd.filter(sentence -> sentence.trim().length()>0);
+            JavaRDD<String> lettersOnlySentence = myRdd.map(sentence -> sentence.replace("^a-zA-Z\\s", "").toLowerCase());
+            JavaRDD<String> removeBlankLines = lettersOnlySentence.filter(sentence -> sentence.trim().length()>0);
             JavaRDD<String> justWords = removeBlankLines.flatMap(sentence -> Arrays.asList(sentence.split("\\ ")).iterator());
             JavaRDD<String> removeBlankWords = justWords.filter(sentence -> sentence.trim().length()>0);
-            JavaPairRDD<String, Long> pairRdd= removeBlankWords.mapToPair(word -> new Tuple2<>(word, 1L));
+            JavaRDD<String> lettersOnlyWord = removeBlankWords.map(sentence -> sentence.replace("^a-zA-Z\\s", ""));
+            JavaPairRDD<String, Long> pairRdd= lettersOnlyWord.mapToPair(word -> new Tuple2<>(word, 1L));
             JavaPairRDD<String, Long> totals = pairRdd.reduceByKey((v1, v2) -> v1 + v2);
             // 因为spark的JavaPairRDD只能sort by key，所以这行是把JavaPairRDD中的key和value做swap
             JavaPairRDD<Long, String> switchedTotal = totals.mapToPair(tuple -> new Tuple2<>(tuple._2, tuple._1));
             boolean sortedInAscending = true;
             JavaPairRDD<Long, String> sorted = switchedTotal.sortByKey(!sortedInAscending);
-            // 只返回top 10 result
-            List<Tuple2<Long, String>> results = sorted.take(10);
+            // 只返回top 20 result
+            List<Tuple2<Long, String>> results = sorted.take(20);
             /*
                 (79,the)
                 (34,to)
@@ -590,6 +591,16 @@ public class Main {
                 (16,a)
                 (15,for)
                 (11,by)
+                (10,president)
+                (10,donald)
+                (10,rally)
+                (10,supporters)
+                (9,washington,)
+                (9,supreme)
+                (8,12,)
+                (8,december)
+                (8,election)
+                (8,court)
              */
             results.forEach(System.out::println);
         }
